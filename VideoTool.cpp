@@ -1,4 +1,4 @@
-\
+
 #include <sstream>
 #include <string>
 #include <iostream>
@@ -6,6 +6,17 @@
 #include "opencv2/highgui/highgui.hpp"
 //#include <opencv2\cv.h>
 #include "opencv2/opencv.hpp"
+
+
+
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h> 
+#include<unistd.h>
+
+
 
 using namespace std;
 using namespace cv;
@@ -185,9 +196,68 @@ void  point(Mat &HSV,Mat &threshold,bool useMorphOps){
 
 }
 
+
+void error(char *msg)
+{
+    perror(msg);
+    exit(0);
+}
+
+
+void moveRobo(char *ip,char *port,char comenzi[]){
+	
+	int sockfd, portno, n;
+
+    struct sockaddr_in serv_addr;
+    struct hostent *server;
+
+    char buffer[256];
+    int i;
+	char aux[2];
+	strcpy(aux,"");
+    portno = atoi(port);
+    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sockfd < 0) 
+        error("ERROR opening socket");
+    server = gethostbyname(ip);
+    if (server == NULL) {
+        fprintf(stderr,"ERROR, no such host\n");
+        exit(0);
+    }
+    bzero((char *) &serv_addr, sizeof(serv_addr));
+    serv_addr.sin_family = AF_INET;
+    bcopy((char *)server->h_addr, 
+         (char *)&serv_addr.sin_addr.s_addr,
+         server->h_length);
+    serv_addr.sin_port = htons(portno);
+    if (connect(sockfd,(struct sockaddr *)&serv_addr,sizeof(serv_addr)) < 0) 
+        error("ERROR connecting");
+	for( i = 0; i<strlen(comenzi); i++){
+		if(comenzi[i] =='r' || comenzi[i] =='f'|| comenzi[i] =='s'|| comenzi[i] =='l'||comenzi[i] =='b'){
+			sprintf(aux,"%c",comenzi[i]);
+			n = send(sockfd,aux,strlen(aux),0);
+			if (n < 0) 
+				error("ERROR writing to socket");
+			sleep(3);}
+	}
+    // printf("Please enter the message: ");
+    // bzero(buffer,256);
+    // fgets(buffer,255,stdin);
+    
+	
+    //bzero(buffer,256);
+  
+
+}
+
 int main(int argc, char* argv[])
 {
-
+int i;
+	
+	char sir[200];
+	strcpy(sir,argv[3]);
+	moveRobo(argv[1],argv[2],sir);
+/*
 	//some boolean variables for different functionality within this
 	//program
 	bool trackObjects = true;
@@ -254,7 +324,7 @@ int main(int argc, char* argv[])
 		//delay 30ms so that screen can refresh.
 		//image will not appear without this waitKey() command
 		waitKey(30);
-	}
+	}*/
 	return 0;
 }
 
