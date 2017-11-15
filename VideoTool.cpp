@@ -15,6 +15,7 @@
 #include <netinet/in.h>
 #include <netdb.h> 
 #include<unistd.h>
+#include <string.h>
 
 
 
@@ -253,11 +254,13 @@ void moveRobo(char *ip,char *port,char comenzi[]){
 int main(int argc, char* argv[])
 {
 int i;
-	
-	char sir[200];
-	strcpy(sir,argv[3]);
-	moveRobo(argv[1],argv[2],sir);
-/*
+	int auxXRoz,auxYRoz,auxXGalben,auxYGalben;
+	char com[10];
+	strcpy(com,"");
+	//char sir[200];
+	//strcpy(sir,argv[3]);
+	//moveRobo(argv[1],argv[2],sir);
+
 	//some boolean variables for different functionality within this
 	//program
 	bool trackObjects = true;
@@ -290,7 +293,7 @@ int i;
 
 	while (1) {
 
-
+		
 		//store image to matrix
 		capture.read(cameraFeed);
 		//convert frame from BGR to HSV colorspace
@@ -311,11 +314,59 @@ int i;
 			trackFilteredObject(x, y, threshold, cameraFeed);
 
 		}
+		
 		inRange(HSV,Scalar(19,110,0),Scalar(256,236,256),threshold);
 		if(useMorphOps)
 			morphOps(threshold);
 		if(trackObjects2)
 			trackFilteredObject(x,y,threshold,cameraFeed);
+		
+		
+		auxXGalben = x;
+		auxYGalben = y;
+		//moveRobo(argv[1],argv[2],sir);
+		int cadranGalben;
+		int cadranRoz;
+		if(y>auxYGalben&&x<=auxXGalben)
+			cadranGalben=1;
+		if(y>auxYGalben&&x>auxXGalben)
+			cadranGalben=2;
+		if(y<=auxYGalben&&x<=auxXGalben)
+			cadranGalben=3;
+		if(y<=auxYGalben&&x>auxXGalben)
+			cadranGalben=4;
+		
+		
+		if(y<=auxYRoz&&x>auxXRoz)
+			cadranRoz=1;
+		if(y<=auxYRoz&&x<=auxXRoz)
+			cadranRoz=2;
+		if(y>auxYRoz&&x>auxXRoz)
+			cadranRoz=3;
+		if(y>auxYRoz&&x<=auxXRoz)
+			cadranRoz=4;
+		
+		printf("%d %d,\n",cadranGalben,cadranRoz);
+		
+		/*
+		if(x > auxXGalben){
+			//orientat dreapta
+			if(auxYGalben <= auxYRoz && y > auxYGalben){
+				strcat(com,"f');
+			}
+			
+			if(auxYGalben < auxYRoz && y <= auxYGalben){
+				strcat(com,"lf");
+			}
+
+		}
+		if(x < auxXRoz){
+			//orientat stanga
+		}
+		if(x == auxXRoz){
+			//orientat jos
+		*/
+		
 		//show frames
 		imshow(windowName2, threshold);
 		imshow(windowName, cameraFeed);
@@ -324,7 +375,7 @@ int i;
 		//delay 30ms so that screen can refresh.
 		//image will not appear without this waitKey() command
 		waitKey(30);
-	}*/
+	}
 	return 0;
 }
 
