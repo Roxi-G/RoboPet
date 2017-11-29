@@ -254,7 +254,7 @@ void moveRobo(char *ip,char *port,char comenzi[]){
 int main(int argc, char* argv[])
 {
 int i;
-	int auxXRoz,auxYRoz,auxXGalben,auxYGalben;
+	int auxXRoz,auxYRoz,auxXV,auxYV;
 	char com[10];
 	strcpy(com,"");
 	//char sir[200];
@@ -300,8 +300,11 @@ int i;
 		cvtColor(cameraFeed, HSV, COLOR_BGR2HSV);
 		//filter HSV image between values and store filtered image to
 		//threshold matri
-		inRange(HSV, Scalar(19, 110, 0), Scalar(166,236,256), threshold);
-		//perform morphological operations on thresholded image to eliminate noise
+		
+    //inRange(HSV, Scalar(19, 110, 0), Scalar(166,236,256), threshold);
+	   inRange(HSV,Scalar(103,37,70),Scalar(206,256,256),threshold);	
+   
+    //perform morphological operations on thresholded image to eliminate noise
 		//and emphasize the filtered object(s)
 		if (useMorphOps)
 			morphOps(threshold);
@@ -315,17 +318,25 @@ int i;
 
 		}
 		
-		inRange(HSV,Scalar(19,110,0),Scalar(256,236,256),threshold);
+    auxXRoz = x;
+		auxYRoz = y;
+		
+    inRange(HSV,Scalar(83,57,0),Scalar(156,256,256),threshold);
 		if(useMorphOps)
 			morphOps(threshold);
 		if(trackObjects2)
-			trackFilteredObject(x,y,threshold,cameraFeed);
+			trackFilteredObject(x,y,threshold,cameraFeed); 
 		
+		auxXV = x;
+		auxYV = y;
 		
-		auxXGalben = x;
-		auxYGalben = y;
 		//moveRobo(argv[1],argv[2],sir);
-		int cadranGalben;
+		/*
+    TODO:
+     VECTORI PT CULORI 
+     TACTICA
+     
+    	int cadranGalben;
 		int cadranRoz;
 		if(y>auxYGalben&&x<=auxXGalben)
 			cadranGalben=1;
@@ -344,11 +355,11 @@ int i;
 		if(y>auxYRoz&&x>auxXRoz)
 			cadranRoz=3;
 		if(y>auxYRoz&&x<=auxXRoz)
-			cadranRoz=4;
+			cadranRoz=4;*/
 		
-		printf("%d %d,\n",cadranGalben,cadranRoz);
-		
+		printf("%d %d, %d %d\n",auxXV,auxYV,auxXRoz,auxYRoz);
 		/*
+	
 		if(x > auxXGalben){
 			//orientat dreapta
 			if(auxYGalben <= auxYRoz && y > auxYGalben){
