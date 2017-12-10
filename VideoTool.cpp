@@ -1,4 +1,3 @@
-
 #include <sstream>
 #include <string>
 #include <iostream>
@@ -7,17 +6,13 @@
 //#include <opencv2\cv.h>
 #include "opencv2/opencv.hpp"
 
-
-
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <netdb.h> 
+#include <netdb.h>
 #include<unistd.h>
 #include <string.h>
-
-
 
 using namespace std;
 using namespace cv;
@@ -189,14 +184,6 @@ void trackFilteredObject(int &x, int &y, Mat threshold, Mat &cameraFeed) {
 	}
 }
 
-void  point(Mat &HSV,Mat &threshold,bool useMorphOps){
-
-	inRange(HSV,Scalar(H_MIN,S_MIN,V_MIN),Scalar(H_MAX,S_MAX,V_MIN),threshold);
-	if(useMorphOps)
-		morphOps(threshold);
-
-}
-
 
 void error(char *msg)
 {
@@ -206,7 +193,7 @@ void error(char *msg)
 
 
 void moveRobo(char *ip,char *port,char comenzi[]){
-	
+
 	int sockfd, portno, n;
 
     struct sockaddr_in serv_addr;
@@ -218,7 +205,7 @@ void moveRobo(char *ip,char *port,char comenzi[]){
 	strcpy(aux,"");
     portno = atoi(port);
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (sockfd < 0) 
+    if (sockfd < 0)
         error("ERROR opening socket");
     server = gethostbyname(ip);
     if (server == NULL) {
@@ -227,39 +214,72 @@ void moveRobo(char *ip,char *port,char comenzi[]){
     }
     bzero((char *) &serv_addr, sizeof(serv_addr));
     serv_addr.sin_family = AF_INET;
-    bcopy((char *)server->h_addr, 
+    bcopy((char *)server->h_addr,
          (char *)&serv_addr.sin_addr.s_addr,
          server->h_length);
     serv_addr.sin_port = htons(portno);
-    if (connect(sockfd,(struct sockaddr *)&serv_addr,sizeof(serv_addr)) < 0) 
+    if (connect(sockfd,(struct sockaddr *)&serv_addr,sizeof(serv_addr)) < 0)
         error("ERROR connecting");
 	for( i = 0; i<strlen(comenzi); i++){
 		if(comenzi[i] =='r' || comenzi[i] =='f'|| comenzi[i] =='s'|| comenzi[i] =='l'||comenzi[i] =='b'){
 			sprintf(aux,"%c",comenzi[i]);
 			n = send(sockfd,aux,strlen(aux),0);
-			if (n < 0) 
+			if (n < 0)
 				error("ERROR writing to socket");
 			sleep(3);}
 	}
     // printf("Please enter the message: ");
     // bzero(buffer,256);
     // fgets(buffer,255,stdin);
-    
-	
-    //bzero(buffer,256);
-  
 
+
+    //bzero(buffer,256);
+
+
+}
+
+
+int matrice[8][8];
+char move[8][7];
+
+
+int directie(int x,int y,int xG,int yG){
+
+    int d = 0;
+    if(y == yG){
+        if(x > xG)
+            d = 6;//v
+        else
+            d = 2;//e
+    }
+    else if(y > yG){
+        if(x > xG)
+            d = 5;//sv
+        else if(x == xG)
+            d = 4;//s
+        else
+            d = 3;//se
+    }else{
+        if(x > xG)
+            d = 7;//nv
+        else if(x == xG)
+            d = 0;//n
+        else
+            d = 1;//ne
+    }
+
+    return d;
 }
 
 int main(int argc, char* argv[])
 {
-int i;
-	int auxXRoz,auxYRoz,auxXV,auxYV;
-	char com[10];
-	strcpy(com,"");
-	//char sir[200];
-	//strcpy(sir,argv[3]);
-	//moveRobo(argv[1],argv[2],sir);
+    int i,j, OurDirection,EnemiDirection;
+
+	int xR,yR,xG,yG;
+	int ip; //seteaza le
+	char port;
+    FILE *f;
+	//moveRobo(ip,port,sir);
 
 	//some boolean variables for different functionality within this
 	//program
@@ -289,22 +309,40 @@ int i;
 	//all of our operations will be performed within this loop
 
 
+    strcpy(move[0],"fs");
+    strcpy(move[1],"rfs");
+    strcpy(move[2],"rrfs");
+    strcpy(move[3],"rrrfs");
+    strcpy(move[4],"rrrrfs");
+    strcpy(move[5],"lllfs");
+    strcpy(move[6],"llfs");
+    strcpy(move[7],"lfs");
+
+    f = fopen("move.txt","rt");
+    if(!f)
+        printf("eroare la fisier");
+
+    for(i = 0; i <= 7;i++){
+        for(j = 0;j <= 7;j++){
+            fscanf(f,"%d",&matrice[i][j]);
+           }
+    }
 
 
 	while (1) {
 
-		
+
 		//store image to matrix
 		capture.read(cameraFeed);
 		//convert frame from BGR to HSV colorspace
 		cvtColor(cameraFeed, HSV, COLOR_BGR2HSV);
 		//filter HSV image between values and store filtered image to
 		//threshold matri
-		
-    //inRange(HSV, Scalar(19, 110, 0), Scalar(166,236,256), threshold);
-	   inRange(HSV,Scalar(103,37,70),Scalar(206,256,256),threshold);	
-   
-    //perform morphological operations on thresholded image to eliminate noise
+
+        //inRange(HSV, Scalar(19, 110, 0), Scalar(166,236,256), threshold);
+	    inRange(HSV,Scalar(103,37,70),Scalar(206,256,256),threshold);
+
+        //perform morphological operations on thresholded image to eliminate noise
 		//and emphasize the filtered object(s)
 		if (useMorphOps)
 			morphOps(threshold);
@@ -313,71 +351,33 @@ int i;
 		//filtered object
 		//point(HSV,threshold,useMorphOps);
 		if (trackObjects){
-			
 			trackFilteredObject(x, y, threshold, cameraFeed);
-
 		}
-		
-    auxXRoz = x;
-		auxYRoz = y;
-		
-    inRange(HSV,Scalar(83,57,0),Scalar(156,256,256),threshold);
+
+        xR = x;
+		yR = y;
+
+        inRange(HSV,Scalar(83,57,0),Scalar(156,256,256),threshold);
+
 		if(useMorphOps)
 			morphOps(threshold);
 		if(trackObjects2)
-			trackFilteredObject(x,y,threshold,cameraFeed); 
-		
-		auxXV = x;
-		auxYV = y;
-		
-		//moveRobo(argv[1],argv[2],sir);
-		/*
-    TODO:
-     VECTORI PT CULORI 
-     TACTICA
-     
-    	int cadranGalben;
-		int cadranRoz;
-		if(y>auxYGalben&&x<=auxXGalben)
-			cadranGalben=1;
-		if(y>auxYGalben&&x>auxXGalben)
-			cadranGalben=2;
-		if(y<=auxYGalben&&x<=auxXGalben)
-			cadranGalben=3;
-		if(y<=auxYGalben&&x>auxXGalben)
-			cadranGalben=4;
-		
-		
-		if(y<=auxYRoz&&x>auxXRoz)
-			cadranRoz=1;
-		if(y<=auxYRoz&&x<=auxXRoz)
-			cadranRoz=2;
-		if(y>auxYRoz&&x>auxXRoz)
-			cadranRoz=3;
-		if(y>auxYRoz&&x<=auxXRoz)
-			cadranRoz=4;*/
-		
-		printf("%d %d, %d %d\n",auxXV,auxYV,auxXRoz,auxYRoz);
-		/*
-	
-		if(x > auxXGalben){
-			//orientat dreapta
-			if(auxYGalben <= auxYRoz && y > auxYGalben){
-				strcat(com,"f');
-			}
-			
-			if(auxYGalben < auxYRoz && y <= auxYGalben){
-				strcat(com,"lf");
-			}
+			trackFilteredObject(x,y,threshold,cameraFeed);
 
-		}
-		if(x < auxXRoz){
-			//orientat stanga
-		}
-		if(x == auxXRoz){
-			//orientat jos
-		*/
-		
+		xG = x;
+		yG = y;
+
+		moveRobo(ip,port,"fs");
+		if(trackObjects2)
+			trackFilteredObject(x,y,threshold,cameraFeed);
+        OurDirection = directie(xG,yG,x,y);
+        printf("Our position %d\n",OurDirection);
+        EnemiDirection = directie(x,y,xR,yR);
+        printf("Enemi position %d\n",EnemiDirection);
+        moveRobo(ip,port,move[matrice[OurDirection][EnemiDirection]]);
+        sleep((strlen(move[matrice[OurDirection][EnemiDirection]])-1)*3);
+
+
 		//show frames
 		imshow(windowName2, threshold);
 		imshow(windowName, cameraFeed);
