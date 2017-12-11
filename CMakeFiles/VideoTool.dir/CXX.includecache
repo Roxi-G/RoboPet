@@ -6,7 +6,7 @@
 
 #IncludeRegexTransform: 
 
-/home/cloud/RoboPet/RoboPet/VideoTool.cpp
+/home/cloud/proiect/RoboPet/VideoTool.cpp
 sstream
 -
 string
@@ -14,9 +14,9 @@ string
 iostream
 -
 opencv2/highgui/highgui.hpp
-/home/cloud/RoboPet/RoboPet/opencv2/highgui/highgui.hpp
+/home/cloud/proiect/RoboPet/opencv2/highgui/highgui.hpp
 opencv2/opencv.hpp
-/home/cloud/RoboPet/RoboPet/opencv2/opencv.hpp
+/home/cloud/proiect/RoboPet/opencv2/opencv.hpp
 stdio.h
 -
 sys/types.h

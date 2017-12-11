@@ -192,7 +192,7 @@ void error(char *msg)
 }
 
 
-void moveRobo(char *ip,char *port,char comenzi[]){
+void moveRobo(char comenzi[]){
 
 	int sockfd, portno, n;
 
@@ -201,13 +201,13 @@ void moveRobo(char *ip,char *port,char comenzi[]){
 
     char buffer[256];
     int i;
-	char aux[2];
+	char aux[3];
 	strcpy(aux,"");
-    portno = atoi(port);
+    portno = 20236;//atoi(port);
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0)
         error("ERROR opening socket");
-    server = gethostbyname(ip);
+    server = gethostbyname("193.226.12.217");
     if (server == NULL) {
         fprintf(stderr,"ERROR, no such host\n");
         exit(0);
@@ -226,7 +226,7 @@ void moveRobo(char *ip,char *port,char comenzi[]){
 			n = send(sockfd,aux,strlen(aux),0);
 			if (n < 0)
 				error("ERROR writing to socket");
-			sleep(3);}
+			sleep(1);}
 	}
     // printf("Please enter the message: ");
     // bzero(buffer,256);
@@ -234,7 +234,6 @@ void moveRobo(char *ip,char *port,char comenzi[]){
 
 
     //bzero(buffer,256);
-
 
 }
 
@@ -276,9 +275,7 @@ int main(int argc, char* argv[])
     int i,j, OurDirection,EnemiDirection;
 
 	int xR,yR,xG,yG;
-	int ip; //seteaza le
-	char port;
-    FILE *f;
+	FILE *f;
 	//moveRobo(ip,port,sir);
 
 	//some boolean variables for different functionality within this
@@ -367,17 +364,18 @@ int main(int argc, char* argv[])
 		xG = x;
 		yG = y;
 
-		moveRobo(ip,port,"fs");
+		moveRobo("fs");
 		if(trackObjects2)
 			trackFilteredObject(x,y,threshold,cameraFeed);
         OurDirection = directie(xG,yG,x,y);
         printf("Our position %d\n",OurDirection);
         EnemiDirection = directie(x,y,xR,yR);
         printf("Enemi position %d\n",EnemiDirection);
-        moveRobo(ip,port,move[matrice[OurDirection][EnemiDirection]]);
-        sleep((strlen(move[matrice[OurDirection][EnemiDirection]])-1)*3);
+        moveRobo(move[matrice[OurDirection][EnemiDirection]]);
+        sleep((strlen(move[matrice[OurDirection][EnemiDirection]])-1)*0.5);
 
 
+		
 		//show frames
 		imshow(windowName2, threshold);
 		imshow(windowName, cameraFeed);
